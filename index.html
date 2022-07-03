@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory game</title>
+    <style>
+      body {
+        text-align: center;
+        min-width: 500px;
+      }
+
+      .grid {
+        display: grid;
+        justify-items: center;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        max-width: 500px;
+        max-height: 500px;
+        margin: 5rem 2rem;
+      }
+
+      img {
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Memory game</h1>
+
+      <div class="grid"></div>
+    </main>
+
+    <script>
+      const cards = [
+        { name: "fries" },
+        { name: "cheeseburger" },
+        { name: "hotdog" },
+        { name: "ice-cream" },
+        { name: "milkshake" },
+        { name: "pizza" },
+        { name: "fries" },
+        { name: "cheeseburger" },
+        { name: "hotdog" },
+        { name: "ice-cream" },
+        { name: "milkshake" },
+        { name: "pizza" },
+      ];
+
+      cards.sort(() => 0.5 - Math.random());
+
+      const gridBoard = document.querySelector(".grid");
+      const chosenCards = [];
+      const previousChosenCards = [];
+      const matchedCards = [];
+
+      function createBoard() {
+        for (let i = 0; i < 12; i++) {
+          const card = document.createElement("img");
+          card.setAttribute("src", "images/blank.png");
+          card.setAttribute("data-id", i);
+          card.addEventListener("click", flipCard);
+          gridBoard.appendChild(card);
+        }
+      }
+
+      function flipCard() {
+        const cardId = this.getAttribute("data-id");
+        const notClicked = chosenCards.every((card) => card.id !== cardId);
+
+        if (chosenCards.length == 2) chosenCards.splice(0, chosenCards.length);
+
+        if (notClicked)
+          chosenCards.push({ name: cards[cardId].name, id: cardId });
+
+        displayCard();
+        checkMatched();
+      }
+
+      function checkMatched() {
+        if (chosenCards.length == 2) {
+          chosenCards.forEach((card) => {
+            previousChosenCards.push({ name: card.name, id: card.id });
+          });
+        }
+
+        if (
+          chosenCards.length === 2 &&
+          chosenCards[0].name === chosenCards[1].name
+        )
+          matchedCards.push(...previousChosenCards);
+      }
+
+      function displayCard() {
+        chosenCards.forEach((chosenCard) => {
+          const card = document.querySelector(`[data-id="${chosenCard.id}"]`);
+          card.setAttribute("src", `images/${cards[chosenCard.id].name}.png`);
+        });
+
+        previousChosenCards.forEach((previousChosenCard) => {
+          const card = document.querySelector(
+            `[data-id="${previousChosenCard.id}"]`
+          );
+          card.setAttribute("src", `images/blank.png`);
+        });
+
+        matchedCards.forEach((matchedCard) => {
+          const card = document.querySelector(`[data-id="${matchedCard.id}"]`);
+          card.setAttribute("src", `images/white.png`);
+        });
+
+        if (previousChosenCards.length == 2)
+          previousChosenCards.splice(0, previousChosenCards.length);
+
+        if (matchedCards.length === 12) {
+          chosenCards.splice(0, chosenCards.length);
+          previousChosenCards.splice(0, previousChosenCards.length);
+          matchedCards.splice(0, matchedCards.length);
+
+          while (gridBoard.firstChild) {
+            gridBoard.removeChild(gridBoard.firstChild);
+          }
+          createBoard();
+        }
+      }
+
+      createBoard();
+    </script>
+  </body>
+</html>
